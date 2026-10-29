@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react"
 import { useCoins } from "@/hooks/useCoins";
 import {
   Table,
@@ -11,19 +12,33 @@ import {
 } from "@/components/ui/table";
 import { formatPrice, formatPercent } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function CoinTable() {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
+  const [search, setSearch] = useState("");
 
   if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Failed to load data</p>;
+  if (error) return <p>Failed to load data: {error.message}</p>;
   if (!data) return null;
+
+  const keyword = search.trim().toLowerCase();
+  const filteredCoins = data.filter(
+    (coin) =>
+      coin.name.toLowerCase().includes(keyword) ||
+      coin.symbol.toLowerCase().includes(keyword)
+  );
 
   return (
     <div>
       <Button onClick={() => refetch()} disabled={isFetching}>
         {isFetching ? "Refreshing..." : "Refresh"}
       </Button>
+      <Input
+        placeholder="search coin..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
       <Table>
         <TableHeader>
           <TableRow>
@@ -34,7 +49,12 @@ export function CoinTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((coin) => (
+          {filteredCoins.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={4}>No coins found</TableCell>
+            </TableRow>
+          )}
+          {filteredCoins.map((coin) => (
             <TableRow key={coin.id}>
               <TableCell>{coin.market_cap_rank}</TableCell>
               <TableCell>{coin.name}</TableCell>
