@@ -8,7 +8,8 @@ import {
   TableHead,
   TableRow,
   TableCell,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
+import { formatPrice, formatPercent } from "@/lib/format";
 
 export function CoinTable() {
   const { data, isLoading, error } = useCoins();
@@ -32,8 +33,8 @@ export function CoinTable() {
           <TableRow key={coin.id}>
             <TableCell>{coin.market_cap_rank}</TableCell>
             <TableCell>{coin.name}</TableCell>
-            <TableCell>{coin.current_price}</TableCell>
-            <TableCell>{coin.price_change_percentage_24h}</TableCell>
+            <TableCell>{formatPrice(coin.current_price)}</TableCell>
+            <TableCell>{formatPercent(coin.price_change_percentage_24h)}</TableCell>
           </TableRow>
         ))}
       </TableBody>
