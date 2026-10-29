@@ -1,6 +1,6 @@
-import { getCoins } from "@/lib/api"
-
-export default async function Home() {
-  const coins = await getCoins();
-  return <pre>{JSON.stringify(coins, null, 2)}</pre>
+import { CoinTable } from "@/components/CoinTable";
+export default function Home() {
+  return (
+    <CoinTable />
+  )
 }
