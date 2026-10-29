@@ -16,3 +16,9 @@ const CoinMarketSchema = z.object({
 
 export const CoinMarketListSchema = z.array(CoinMarketSchema);
 export type CoinMarket = z.infer<typeof CoinMarketSchema>;
+
+export const CoinChartSchema = z.object({
+  prices: z.array(z.tuple([z.number(), z.number()])),
+});
+
+export type CoinChart = z.infer<typeof CoinChartSchema>;

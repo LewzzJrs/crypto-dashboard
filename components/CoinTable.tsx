@@ -13,10 +13,12 @@ import {
 import { formatPrice, formatPercent } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PriceChart } from "@/components/PriceChart";
 
 export function CoinTable() {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
   const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Failed to load data: {error.message}</p>;
@@ -39,6 +41,7 @@ export function CoinTable() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      {selectedId && <PriceChart coinId={selectedId} />}
       <Table>
         <TableHeader>
           <TableRow>
@@ -55,12 +58,16 @@ export function CoinTable() {
             </TableRow>
           )}
           {filteredCoins.map((coin) => (
-            <TableRow key={coin.id}>
+            <TableRow
+              key={coin.id}
+              onClick={() => setSelectedId(coin.id)}
+              className="cursor-pointer"
+            >
               <TableCell>{coin.market_cap_rank}</TableCell>
               <TableCell>{coin.name}</TableCell>
               <TableCell>{formatPrice(coin.current_price)}</TableCell>
               <TableCell>{formatPercent(coin.price_change_percentage_24h)}</TableCell>
-            </TableRow>
+              </TableRow>
           ))}
         </TableBody>
       </Table>
