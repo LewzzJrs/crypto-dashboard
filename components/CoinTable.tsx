@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import { useCoins } from "@/hooks/useCoins";
 import {
   Table,
@@ -14,11 +14,14 @@ import { formatPrice, formatPercent } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceChart } from "@/components/PriceChart";
+import { CurrencySelect } from "@/components/CurrencySelect";
+import { useCurrencyStore } from "@/stores/currencyStore";
 
 export function CoinTable() {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const currency = useCurrencyStore((state) => state.currency);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Failed to load data: {error.message}</p>;
@@ -28,7 +31,7 @@ export function CoinTable() {
   const filteredCoins = data.filter(
     (coin) =>
       coin.name.toLowerCase().includes(keyword) ||
-      coin.symbol.toLowerCase().includes(keyword)
+      coin.symbol.toLowerCase().includes(keyword),
   );
 
   return (
@@ -36,6 +39,7 @@ export function CoinTable() {
       <Button onClick={() => refetch()} disabled={isFetching}>
         {isFetching ? "Refreshing..." : "Refresh"}
       </Button>
+      <CurrencySelect />
       <Input
         placeholder="search coin..."
         value={search}
@@ -65,14 +69,14 @@ export function CoinTable() {
             >
               <TableCell>{coin.market_cap_rank}</TableCell>
               <TableCell>{coin.name}</TableCell>
-              <TableCell>{formatPrice(coin.current_price)}</TableCell>
-              <TableCell>{formatPercent(coin.price_change_percentage_24h)}</TableCell>
-              </TableRow>
+              <TableCell>{formatPrice(coin.current_price, currency)}</TableCell>
+              <TableCell>
+                {formatPercent(coin.price_change_percentage_24h)}
+              </TableCell>
+            </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
-
-
