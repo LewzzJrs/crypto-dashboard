@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
+import { isCurrency } from "@/lib/currencies";
 
 const BASE_URL = "https://api.coingecko.com/api/v3";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const currency = searchParams.get("currency") ?? "usd";
+  const raw = searchParams.get("currency") ?? "usd";
+  if (!isCurrency(raw)) {
+    return NextResponse.json({ error: "Unsupported currency" }, { status: 400 });
+  }
+  const currency = raw;
   const url = `${BASE_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=250&page=1`;
 
   const res = await fetch(url, { next: { revalidate: 60} });
