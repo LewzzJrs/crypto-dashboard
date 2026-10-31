@@ -17,6 +17,7 @@ import { DEFAULT_TIMEFRAME_ID, TIMEFRAMES } from "@/lib/ranges";
 import type { CoinSelection } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 import { useCurrencyStore } from "@/stores/currencyStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -33,9 +34,15 @@ export function PriceChart({
   options,
   onSelect,
 }: PriceChartProps) {
-  const [timeframeId, setTimeframeId] = useState(DEFAULT_TIMEFRAME_ID);
+  const defaultTimeframeId = useSettingsStore(
+    (state) => state.defaultTimeframeId,
+  );
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const activeId = pickedId ?? defaultTimeframeId;
   const timeframe =
-    TIMEFRAMES.find((item) => item.id === timeframeId) ?? TIMEFRAMES[0];
+    TIMEFRAMES.find((item) => item.id === activeId) ??
+    TIMEFRAMES.find((item) => item.id === DEFAULT_TIMEFRAME_ID) ??
+    TIMEFRAMES[0];
   const { data, isLoading, error, refetch, isFetching } = useCoinChart(
     coinId,
     symbol,
@@ -94,7 +101,7 @@ export function PriceChart({
               key={item.id}
               type="button"
               aria-pressed={item.id === timeframe.id}
-              onClick={() => setTimeframeId(item.id)}
+              onClick={() => setPickedId(item.id)}
               className={cn(
                 "rounded-[10px] bg-[rgba(26,17,29,0.7)] p-2.5 text-sm font-bold",
                 item.id === timeframe.id ? "text-white" : "text-muted-foreground",

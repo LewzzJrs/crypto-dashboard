@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Plus, Star } from "lucide-react";
 import { useCoins } from "@/hooks/useCoins";
 import { useWatchlistStore } from "@/stores/watchlistStore";
@@ -7,27 +8,13 @@ import { CoinLogo } from "@/components/CoinLogo";
 
 const PREVIEW_COUNT = 2;
 
-interface WatchlistCardProps {
-  onlyWatchlist: boolean;
-  onToggle: () => void;
-}
-
-export function WatchlistCard({ onlyWatchlist, onToggle }: WatchlistCardProps) {
+export function WatchlistCard() {
   const { data } = useCoins();
   const ids = useWatchlistStore((state) => state.ids);
 
   const preview = (data ?? [])
     .filter((coin) => ids.includes(coin.id))
     .slice(0, PREVIEW_COUNT);
-
-  const handleClick = () => {
-    if (!onlyWatchlist) {
-      document
-        .getElementById("coins")
-        ?.scrollIntoView({ behavior: "smooth" });
-    }
-    onToggle();
-  };
 
   return (
     <section
@@ -46,13 +33,13 @@ export function WatchlistCard({ onlyWatchlist, onToggle }: WatchlistCardProps) {
             <CoinLogo src={coin.image} name={coin.name} className="size-[46px]" />
           </span>
         ))}
-        <a
-          href="#coins"
-          aria-label="Add coins from the table"
+        <Link
+          href="/markets"
+          aria-label="Add coins from Markets"
           className="flex size-[60px] shrink-0 items-center justify-center rounded-full border-2 border-dashed border-[rgba(114,63,216,0.73)] text-white"
         >
           <Plus size={19} />
-        </a>
+        </Link>
       </div>
       <div className="mt-[27px] flex items-center gap-[5px]">
         <span className="text-[15px] font-medium text-[#9080ba]">Starred:</span>
@@ -60,14 +47,13 @@ export function WatchlistCard({ onlyWatchlist, onToggle }: WatchlistCardProps) {
           {ids.length}
         </span>
       </div>
-      <button
-        type="button"
-        onClick={handleClick}
+      <Link
+        href="/watchlist"
         className="mt-auto flex w-full items-center justify-center gap-2 rounded-[10px] bg-linear-to-r from-[#ac6aec] to-[#bb7ff5] px-4 py-2.5 text-sm font-semibold text-white"
       >
         <Star size={20} />
-        {onlyWatchlist ? "Show All" : "Show Watchlist"}
-      </button>
+        Open Watchlist
+      </Link>
     </section>
   );
 }

@@ -1,18 +1,32 @@
 # Crypto Dashboard
 
-An open-source cryptocurrency dashboard built with Next.js. It shows live prices for the top 250 coins, price charts from 1 minute to 1 month, a persistent watchlist and multi-currency support.
+An open-source cryptocurrency dashboard built with Next.js. It shows live prices for the top 250 coins, price charts from 1 minute to 1 month, a persistent watchlist, a portfolio tracker, a currency converter and multi-currency support.
 
 ## Features
 
-- Market table with the top 250 coins by market cap, search and 24h change indicators
+- Market table with the top 250 coins by market cap, live search, sortable columns and 24h change indicators
 - Price chart with 1m, 15m, 1h, 4h, 1D, 1W and 1M timeframes
 - Top coin cards with 7-day sparklines
 - Market overview comparing the 7-day performance of the top 3 coins
 - Market trend list with the biggest 24h movers
 - Watchlist saved in the browser (localStorage)
+- Portfolio tracker with total value and profit / loss, saved in the browser
+- Converter between crypto and fiat currencies, or between two coins
+- Settings for currency, auto refresh interval and the default chart timeframe
 - 7 display currencies: USD, IDR, EUR, JPY, GBP, AUD, SGD
 - Loading skeletons, error states with retry, and empty states
 - Responsive layout
+
+## Pages
+
+| Route | Description |
+| --- | --- |
+| `/` | Overview with the price chart, top coins, market overview and market trend |
+| `/markets` | All coins with search and sortable columns. Accepts `?q=` to prefill the search |
+| `/watchlist` | Coins you starred |
+| `/portfolio` | Your holdings, total value and profit / loss |
+| `/converter` | Convert between coins and fiat currencies |
+| `/settings` | Currency, auto refresh, default chart timeframe and saved data |
 
 ## Tech Stack
 
@@ -88,13 +102,14 @@ app/
   api/
     coins/              CoinGecko market list and per-coin charts
     candles/            Binance candles for short timeframes
+  markets/ watchlist/ portfolio/ converter/ settings/   One page per route
   layout.tsx
   page.tsx
-components/             Dashboard sections (header, cards, charts, table)
+components/             Page views and dashboard sections (header, cards, charts, table)
   ui/                   shadcn/ui primitives
 hooks/                  TanStack Query hooks
 lib/                    API client, schemas, formatters, constants
-stores/                 Zustand stores (currency, watchlist)
+stores/                 Zustand stores (currency, watchlist, portfolio, settings)
 ```
 
 ## Design
