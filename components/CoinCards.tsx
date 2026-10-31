@@ -19,13 +19,12 @@ const CARD_COUNT = 10;
 const PLACEHOLDERS = Array.from({ length: 5 }, (_, index) => index);
 const SCROLL_STEP = 260;
 
-export function CoinCards({
-  selectedId,
-  onSelect,
-}: {
+interface CoinCardsProps {
   selectedId: string | null;
   onSelect: (coin: CoinMarket) => void;
-}) {
+}
+
+export function CoinCards({ selectedId, onSelect }: CoinCardsProps) {
   const { data, isLoading } = useCoins();
   const currency = useCurrencyStore((state) => state.currency);
   const scroller = useRef<HTMLDivElement>(null);

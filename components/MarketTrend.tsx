@@ -13,11 +13,11 @@ const PLACEHOLDERS = Array.from({ length: ROW_COUNT }, (_, index) => index);
 const ROW_GRID =
   "grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_92px] items-center gap-[5px]";
 
-export function MarketTrend({
-  onSelect,
-}: {
+interface MarketTrendProps {
   onSelect: (coin: CoinMarket) => void;
-}) {
+}
+
+export function MarketTrend({ onSelect }: MarketTrendProps) {
   const { data, isLoading } = useCoins();
   const currency = useCurrencyStore((state) => state.currency);
 

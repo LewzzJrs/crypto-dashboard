@@ -7,13 +7,12 @@ import { CoinLogo } from "@/components/CoinLogo";
 
 const PREVIEW_COUNT = 2;
 
-export function WatchlistCard({
-  onlyWatchlist,
-  onToggle,
-}: {
+interface WatchlistCardProps {
   onlyWatchlist: boolean;
   onToggle: () => void;
-}) {
+}
+
+export function WatchlistCard({ onlyWatchlist, onToggle }: WatchlistCardProps) {
   const { data } = useCoins();
   const ids = useWatchlistStore((state) => state.ids);
 

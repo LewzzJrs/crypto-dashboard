@@ -20,17 +20,19 @@ import { ArrowDown, ArrowUp, Star } from "lucide-react";
 const SKELETON_ROWS = Array.from({ length: 8 }, (_, index) => index);
 const COLUMNS = Array.from({ length: 5 }, (_, index) => index);
 
+interface CoinTableProps {
+  search: string;
+  onlyWatchlist: boolean;
+  onToggleOnlyWatchlist: () => void;
+  onSelect: (coin: CoinMarket) => void;
+}
+
 export function CoinTable({
   search,
   onlyWatchlist,
   onToggleOnlyWatchlist,
   onSelect,
-}: {
-  search: string;
-  onlyWatchlist: boolean;
-  onToggleOnlyWatchlist: () => void;
-  onSelect: (coin: CoinMarket) => void;
-}) {
+}: CoinTableProps) {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
   const currency = useCurrencyStore((state) => state.currency);
   const watchlist = useWatchlistStore((state) => state.ids);
@@ -54,7 +56,7 @@ export function CoinTable({
   return (
     <section
       id="coins"
-      className="flex scroll-mt-5 flex-col gap-3 rounded-[20px] bg-card px-6 pb-4 pt-[17px]"
+      className="flex scroll-mt-5 flex-col gap-3 rounded-[20px] bg-card px-6 pb-4 pt-4.25"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-white">All Coins</h2>

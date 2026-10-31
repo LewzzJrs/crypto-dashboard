@@ -20,17 +20,19 @@ import { useCurrencyStore } from "@/stores/currencyStore";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface PriceChartProps {
+  coinId: string;
+  symbol: string;
+  options: CoinSelection[];
+  onSelect: (coin: CoinSelection) => void;
+}
+
 export function PriceChart({
   coinId,
   symbol,
   options,
   onSelect,
-}: {
-  coinId: string;
-  symbol: string;
-  options: CoinSelection[];
-  onSelect: (coin: CoinSelection) => void;
-}) {
+}: PriceChartProps) {
   const [timeframeId, setTimeframeId] = useState(DEFAULT_TIMEFRAME_ID);
   const timeframe =
     TIMEFRAMES.find((item) => item.id === timeframeId) ?? TIMEFRAMES[0];
@@ -63,7 +65,7 @@ export function PriceChart({
         });
 
   return (
-    <section className="min-h-[289px] rounded-[25px] border-2 border-white/50 bg-[linear-gradient(148deg,rgba(255,255,255,0.12)_28.7%,rgba(255,255,255,0)_100%)] p-[25px] backdrop-blur-[70px]">
+    <section className="min-h-72.25 rounded-[25px] border-2 border-white/50 bg-[linear-gradient(148deg,rgba(255,255,255,0.12)_28.7%,rgba(255,255,255,0)_100%)] p-6.25 backdrop-blur-[70px]">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="relative">
           <select
@@ -73,7 +75,7 @@ export function PriceChart({
               const option = options.find((item) => item.id === e.target.value);
               if (option) onSelect(option);
             }}
-            className="appearance-none rounded-[10px] bg-[rgba(26,17,29,0.7)] py-2.5 pl-[13px] pr-10 text-sm font-bold text-white outline-none"
+            className="appearance-none rounded-[10px] bg-[rgba(26,17,29,0.7)] py-2.5 pl-3.25 pr-10 text-sm font-bold text-white outline-none"
           >
             {options.map((option) => (
               <option key={option.id} value={option.id}>
@@ -103,9 +105,9 @@ export function PriceChart({
           ))}
         </div>
       </div>
-      {isLoading && <Skeleton className="h-[173px] w-full" />}
+      {isLoading && <Skeleton className="h-43.25 w-full" />}
       {error && (
-        <div className="flex h-[173px] w-full flex-col items-center justify-center gap-3">
+        <div className="flex h-43.25 w-full flex-col items-center justify-center gap-3">
           <p className="text-center text-sm">
             Failed to load chart: {error.message}
           </p>
@@ -119,7 +121,7 @@ export function PriceChart({
         </div>
       )}
       {!isLoading && !error && data && (
-        <div className="h-[173px] w-full">
+        <div className="h-43.25 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={points}>
               <XAxis

@@ -4,13 +4,12 @@ import { ChevronLeft, RefreshCw, Search, User } from "lucide-react";
 import { useCoins } from "@/hooks/useCoins";
 import { CurrencySelect } from "@/components/CurrencySelect";
 
-export function Header({
-  search,
-  onSearchChange,
-}: {
+interface HeaderProps {
   search: string;
   onSearchChange: (value: string) => void;
-}) {
+}
+
+export function Header({ search, onSearchChange }: HeaderProps) {
   const { refetch, isFetching } = useCoins();
 
   return (
