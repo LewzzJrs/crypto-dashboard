@@ -1,6 +1,5 @@
-import { CoinTable } from "@/components/CoinTable";
+import { Dashboard } from "@/components/Dashboard";
+
 export default function Home() {
-  return (
-    <CoinTable />
-  )
+  return <Dashboard />;
 }
