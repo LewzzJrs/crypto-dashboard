@@ -2,12 +2,60 @@ import Image from "next/image";
 import Link from "next/link";
 
 const LAYERS = [
-  { src: "/hero/sphere.png", left: 384, top: 244, width: 124, height: 124 },
-  { src: "/hero/pill.png", left: 304, top: 94, width: 99.5, height: 120 },
-  { src: "/hero/gem.png", left: 411, top: 88, width: 194, height: 145 },
-  { src: "/hero/cube.png", left: 499, top: 161, width: 228, height: 170 },
-  { src: "/hero/round-cube.png", left: 531, top: -6, width: 98, height: 83 },
-  { src: "/hero/toroid.png", left: 384, top: -23, width: 133, height: 117 },
+  {
+    src: "/hero/sphere.png",
+    left: 384,
+    top: 244,
+    width: 124,
+    height: 124,
+    duration: 7,
+    delay: -2,
+  },
+  {
+    src: "/hero/pill.png",
+    left: 304,
+    top: 94,
+    width: 99.5,
+    height: 120,
+    duration: 5.5,
+    delay: -1,
+  },
+  {
+    src: "/hero/gem.png",
+    left: 411,
+    top: 88,
+    width: 194,
+    height: 145,
+    duration: 6.5,
+    delay: -4,
+  },
+  {
+    src: "/hero/cube.png",
+    left: 499,
+    top: 161,
+    width: 228,
+    height: 170,
+    duration: 8,
+    delay: -3,
+  },
+  {
+    src: "/hero/round-cube.png",
+    left: 531,
+    top: -6,
+    width: 98,
+    height: 83,
+    duration: 5,
+    delay: -2.5,
+  },
+  {
+    src: "/hero/toroid.png",
+    left: 384,
+    top: -23,
+    width: 133,
+    height: 117,
+    duration: 7.5,
+    delay: -5,
+  },
 ];
 
 export function HeroBanner() {
@@ -17,7 +65,7 @@ export function HeroBanner() {
         aria-hidden="true"
         className="pointer-events-none absolute right-0 top-0 hidden h-full w-[628px] @min-[600px]:block"
       >
-        {LAYERS.map(({ src, left, top, width, height }) => (
+        {LAYERS.map(({ src, left, top, width, height, duration, delay }) => (
           <Image
             key={src}
             src={src}
@@ -25,8 +73,17 @@ export function HeroBanner() {
             width={width}
             height={height}
             unoptimized
-            className="absolute max-w-none select-none"
-            style={{ left, top, width, height }}
+            className="hero-float absolute max-w-none select-none"
+            style={
+              {
+                left,
+                top,
+                width,
+                height,
+                "--hero-float-duration": `${duration}s`,
+                "--hero-float-delay": `${delay}s`,
+              } as React.CSSProperties
+            }
           />
         ))}
       </div>
