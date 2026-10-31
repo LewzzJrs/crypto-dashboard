@@ -1,8 +1,35 @@
+import Image from "next/image";
 import Link from "next/link";
+
+const LAYERS = [
+  { src: "/hero/sphere.png", left: 384, top: 244, width: 124, height: 124 },
+  { src: "/hero/pill.png", left: 304, top: 94, width: 99.5, height: 120 },
+  { src: "/hero/gem.png", left: 411, top: 88, width: 194, height: 145 },
+  { src: "/hero/cube.png", left: 499, top: 161, width: 228, height: 170 },
+  { src: "/hero/round-cube.png", left: 531, top: -6, width: 98, height: 83 },
+  { src: "/hero/toroid.png", left: 384, top: -23, width: 133, height: 117 },
+];
 
 export function HeroBanner() {
   return (
-    <section className="relative min-h-[289px] overflow-hidden rounded-[20px] border border-black bg-[linear-gradient(236.48deg,#a0525c_0%,#a0525c_10%,#9e5061_20%,#984c6b_30%,#904877_40%,#864283_50%,#793a91_60%,#6a329f_70%,#5828af_80%,#441dbf_90%,#2d11d1_100%)]">
+    <section className="@container relative min-h-[289px] overflow-hidden rounded-[20px] border border-black bg-[linear-gradient(236.48deg,#a0525c_0%,#a0525c_10%,#9e5061_20%,#984c6b_30%,#904877_40%,#864283_50%,#793a91_60%,#6a329f_70%,#5828af_80%,#441dbf_90%,#2d11d1_100%)]">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-0 top-0 hidden h-full w-[628px] @min-[600px]:block"
+      >
+        {LAYERS.map(({ src, left, top, width, height }) => (
+          <Image
+            key={src}
+            src={src}
+            alt=""
+            width={width}
+            height={height}
+            unoptimized
+            className="absolute max-w-none select-none"
+            style={{ left, top, width, height }}
+          />
+        ))}
+      </div>
       <div className="absolute left-[31px] top-[29px] flex flex-col gap-2.5">
         <p className="text-[10px] font-bold tracking-[1px] text-white">
           CRYPTO DASHBOARD
@@ -11,7 +38,7 @@ export function HeroBanner() {
           <p className="text-2xl font-bold text-white sm:text-[30px]">
             Your Gateway
             <br />
-            into the Crypto Market
+            into Crypto
           </p>
           <p className="text-sm font-medium text-white/80">
             Live prices, charts and a watchlist.
