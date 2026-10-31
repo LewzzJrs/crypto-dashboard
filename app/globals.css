@@ -133,3 +133,24 @@
     scroll-behavior: smooth;
   }
 }
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.hero-float {
+  animation: hero-float var(--hero-float-duration, 6s) ease-in-out infinite;
+  animation-delay: var(--hero-float-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float {
+    animation: none;
+  }
+}
