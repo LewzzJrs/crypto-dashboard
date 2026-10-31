@@ -2,6 +2,27 @@
 
 An open-source cryptocurrency dashboard built with Next.js. It shows live prices for the top 250 coins, price charts from 1 minute to 1 month, a persistent watchlist, a portfolio tracker, a currency converter and multi-currency support.
 
+![Home](docs/screenshots/home.png)
+
+## Screenshots
+
+Screenshots use sample data, not live prices.
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/markets.png" alt="Markets page with sortable coin table"><br><sub>Markets</sub></td>
+    <td width="50%"><img src="docs/screenshots/watchlist.png" alt="Watchlist page"><br><sub>Watchlist</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/portfolio.png" alt="Portfolio page with holdings and profit and loss"><br><sub>Portfolio</sub></td>
+    <td width="50%"><img src="docs/screenshots/converter.png" alt="Converter page"><br><sub>Converter</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/settings.png" alt="Settings page"><br><sub>Settings</sub></td>
+    <td width="50%"></td>
+  </tr>
+</table>
+
 ## Features
 
 - Market table with the top 250 coins by market cap, live search, sortable columns and 24h change indicators
@@ -16,6 +37,7 @@ An open-source cryptocurrency dashboard built with Next.js. It shows live prices
 - 7 display currencies: USD, IDR, EUR, JPY, GBP, AUD, SGD
 - Loading skeletons, error states with retry, and empty states
 - Responsive layout
+- Unit tests for the portfolio, converter and formatting logic
 
 ## Pages
 
@@ -38,6 +60,7 @@ An open-source cryptocurrency dashboard built with Next.js. It shows live prices
 - [Zod](https://zod.dev) for response validation
 - [Recharts](https://recharts.org) for charts
 - [lucide-react](https://lucide.dev) for icons
+- [Vitest](https://vitest.dev) for unit tests
 
 ## Getting Started
 
@@ -77,6 +100,16 @@ npm start
 | `npm run build` | Create a production build |
 | `npm start` | Run the production build |
 | `npm run lint` | Run ESLint |
+| `npm test` | Run the unit tests once |
+| `npm run test:watch` | Run the unit tests and re-run them on file changes |
+
+## Testing
+
+Unit tests use [Vitest](https://vitest.dev) and live next to the code they test as `lib/*.test.ts`. They cover the pure logic: profit / loss and totals in `lib/portfolio.ts`, unit conversion in `lib/converter.ts` and number formatting in `lib/format.ts`. They use fixed sample data and never call the network.
+
+```bash
+npm test
+```
 
 ## Environment Variables
 
@@ -108,13 +141,15 @@ app/
 components/             Page views and dashboard sections (header, cards, charts, table)
   ui/                   shadcn/ui primitives
 hooks/                  TanStack Query hooks
-lib/                    API client, schemas, formatters, constants
+lib/                    API client, schemas, formatters, constants, and their unit tests (*.test.ts)
 stores/                 Zustand stores (currency, watchlist, portfolio, settings)
+public/hero/            3D images used in the home banner
+docs/screenshots/       Screenshots used in this README
 ```
 
 ## Design
 
-The interface is based on the [Cryptocurrency Dashboard (FREEBIE)](https://www.figma.com/community/file/1020368000168618349) community design on Figma.
+The interface follows a dashboard design made in Figma: dark background, purple accents, glass-style cards and 3D shapes in the home banner. The Figma file is not part of this repository.
 
 ## Contributing
 
@@ -125,7 +160,7 @@ Contributions are welcome.
 3. Commit using [Conventional Commits](https://www.conventionalcommits.org), for example `feat: add price alerts`
 4. Push the branch and open a pull request
 
-Please run `npm run lint` before opening a pull request.
+Please run `npm run lint` and `npm test` before opening a pull request.
 
 ## License
 
