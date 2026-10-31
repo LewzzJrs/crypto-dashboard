@@ -26,6 +26,7 @@ export function CoinTable() {
   const currency = useCurrencyStore((state) => state.currency);
   const watchlist = useWatchlistStore((state) => state.ids);
   const toggleWatch = useWatchlistStore((state) => state.toggle);
+  const [onlyWatchlist, setOnlyWatchlist] = useState(false);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Failed to load data: {error.message}</p>;
@@ -34,14 +35,18 @@ export function CoinTable() {
   const keyword = search.trim().toLowerCase();
   const filteredCoins = data.filter(
     (coin) =>
-      coin.name.toLowerCase().includes(keyword) ||
-      coin.symbol.toLowerCase().includes(keyword),
+      (coin.name.toLowerCase().includes(keyword) ||
+        coin.symbol.toLowerCase().includes(keyword)) &&
+      (!onlyWatchlist || watchlist.includes(coin.id)),
   );
 
   return (
     <div>
       <Button onClick={() => refetch()} disabled={isFetching}>
         {isFetching ? "Refreshing..." : "Refresh"}
+      </Button>
+      <Button variant="outline" onClick={() => setOnlyWatchlist((prev) => !prev)}>
+        {onlyWatchlist ? "Show all" : "Watchlist only"}
       </Button>
       <CurrencySelect />
       <Input
