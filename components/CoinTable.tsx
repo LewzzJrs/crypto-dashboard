@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp, Star } from "lucide-react";
 import { useCoins } from "@/hooks/useCoins";
 import {
   Table,
@@ -15,42 +17,129 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrencyStore } from "@/stores/currencyStore";
 import { useWatchlistStore } from "@/stores/watchlistStore";
-import { ArrowDown, ArrowUp, Star } from "lucide-react";
 
 const SKELETON_ROWS = Array.from({ length: 8 }, (_, index) => index);
 const COLUMNS = Array.from({ length: 5 }, (_, index) => index);
 
+type SortKey = "rank" | "name" | "price" | "change";
+type Direction = "asc" | "desc";
+interface SortState {
+  key: SortKey;
+  direction: Direction;
+}
+
+const DEFAULT_DIRECTION: Record<SortKey, Direction> = {
+  rank: "asc",
+  name: "asc",
+  price: "desc",
+  change: "desc",
+};
+
+function sortValue(coin: CoinMarket, key: SortKey) {
+  switch (key) {
+    case "rank":
+      return coin.market_cap_rank;
+    case "name":
+      return coin.name.toLowerCase();
+    case "price":
+      return coin.current_price;
+    case "change":
+      return coin.price_change_percentage_24h;
+  }
+}
+
+function compareCoins(a: CoinMarket, b: CoinMarket, sort: SortState) {
+  const x = sortValue(a, sort.key);
+  const y = sortValue(b, sort.key);
+  if (x === null && y === null) return 0;
+  if (x === null) return 1;
+  if (y === null) return -1;
+  const result =
+    typeof x === "string" && typeof y === "string"
+      ? x.localeCompare(y)
+      : Number(x) - Number(y);
+  return sort.direction === "asc" ? result : -result;
+}
+
+interface SortHeadProps {
+  label: string;
+  sortKey: SortKey;
+  sort: SortState;
+  onSort: (key: SortKey) => void;
+}
+
+function SortHead({ label, sortKey, sort, onSort }: SortHeadProps) {
+  const active = sort.key === sortKey;
+  return (
+    <TableHead
+      aria-sort={
+        active ? (sort.direction === "asc" ? "ascending" : "descending") : "none"
+      }
+    >
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        className="inline-flex items-center gap-1"
+      >
+        {label}
+        {active &&
+          (sort.direction === "asc" ? (
+            <ChevronUp size={12} />
+          ) : (
+            <ChevronDown size={12} />
+          ))}
+      </button>
+    </TableHead>
+  );
+}
+
 interface CoinTableProps {
   search: string;
-  onlyWatchlist: boolean;
-  onToggleOnlyWatchlist: () => void;
   onSelect: (coin: CoinMarket) => void;
+  title?: string;
+  watchlistOnly?: boolean;
 }
 
 export function CoinTable({
   search,
-  onlyWatchlist,
-  onToggleOnlyWatchlist,
   onSelect,
+  title = "All Coins",
+  watchlistOnly = false,
 }: CoinTableProps) {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
   const currency = useCurrencyStore((state) => state.currency);
   const watchlist = useWatchlistStore((state) => state.ids);
   const toggleWatch = useWatchlistStore((state) => state.toggle);
+  const [filterWatchlist, setFilterWatchlist] = useState(false);
+  const [sort, setSort] = useState<SortState>({
+    key: "rank",
+    direction: "asc",
+  });
 
+  const onlyWatchlist = watchlistOnly || filterWatchlist;
   const keyword = search.trim().toLowerCase();
-  const filteredCoins = (data ?? []).filter(
-    (coin) =>
-      (coin.name.toLowerCase().includes(keyword) ||
-        coin.symbol.toLowerCase().includes(keyword)) &&
-      (!onlyWatchlist || watchlist.includes(coin.id)),
-  );
+  const visibleCoins = (data ?? [])
+    .filter(
+      (coin) =>
+        (coin.name.toLowerCase().includes(keyword) ||
+          coin.symbol.toLowerCase().includes(keyword)) &&
+        (!onlyWatchlist || watchlist.includes(coin.id)),
+    )
+    .sort((a, b) => compareCoins(a, b, sort));
+
+  const handleSort = (key: SortKey) => {
+    setSort((prev) =>
+      prev.key === key
+        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: DEFAULT_DIRECTION[key] },
+    );
+  };
 
   const showError = !!error && !data;
-  const showEmpty = !isLoading && !showError && filteredCoins.length === 0;
+  const showEmpty = !isLoading && !showError && visibleCoins.length === 0;
   const emptyMessage =
     onlyWatchlist && watchlist.length === 0
-      ? "Your watchlist is empty. Star a coin to add it."
+      ? "Your watchlist is empty. Star a coin in Markets to add it."
       : "No coins found";
 
   return (
@@ -59,10 +148,16 @@ export function CoinTable({
       className="flex scroll-mt-5 flex-col gap-3 rounded-[20px] bg-card px-6 pb-4 pt-4.25"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-lg font-bold text-white">All Coins</h2>
-        <Button size="lg" variant="outline" onClick={onToggleOnlyWatchlist}>
-          {onlyWatchlist ? "Show all" : "Watchlist only"}
-        </Button>
+        <h2 className="text-lg font-bold text-white">{title}</h2>
+        {!watchlistOnly && (
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => setFilterWatchlist((prev) => !prev)}
+          >
+            {filterWatchlist ? "Show all" : "Watchlist only"}
+          </Button>
+        )}
       </div>
       {error && data && (
         <p className="text-sm text-destructive">
@@ -73,10 +168,25 @@ export function CoinTable({
         <TableHeader className="[&_th]:text-xs [&_th]:text-[#bfb7b7]">
           <TableRow>
             <TableHead></TableHead>
-            <TableHead>#</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Last Price</TableHead>
-            <TableHead>24h Change</TableHead>
+            <SortHead label="#" sortKey="rank" sort={sort} onSort={handleSort} />
+            <SortHead
+              label="Name"
+              sortKey="name"
+              sort={sort}
+              onSort={handleSort}
+            />
+            <SortHead
+              label="Last Price"
+              sortKey="price"
+              sort={sort}
+              onSort={handleSort}
+            />
+            <SortHead
+              label="24h Change"
+              sortKey="change"
+              sort={sort}
+              onSort={handleSort}
+            />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -116,7 +226,7 @@ export function CoinTable({
               </TableCell>
             </TableRow>
           )}
-          {filteredCoins.map((coin) => {
+          {visibleCoins.map((coin) => {
             const change = coin.price_change_percentage_24h;
             const isUp = change !== null && change >= 0;
 

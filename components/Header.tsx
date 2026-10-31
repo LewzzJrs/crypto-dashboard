@@ -1,16 +1,27 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { ChevronLeft, RefreshCw, Search, User } from "lucide-react";
 import { useCoins } from "@/hooks/useCoins";
 import { CurrencySelect } from "@/components/CurrencySelect";
 
 interface HeaderProps {
-  search: string;
-  onSearchChange: (value: string) => void;
+  title: string;
+  search?: string;
+  onSearchChange?: (value: string) => void;
 }
 
-export function Header({ search, onSearchChange }: HeaderProps) {
+export function Header({ title, search, onSearchChange }: HeaderProps) {
+  const router = useRouter();
   const { refetch, isFetching } = useCoins();
+  const isLive = onSearchChange !== undefined;
+  const controlledProps = onSearchChange
+    ? {
+        value: search ?? "",
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+          onSearchChange(e.target.value),
+      }
+    : {};
 
   return (
     <header
@@ -20,25 +31,39 @@ export function Header({ search, onSearchChange }: HeaderProps) {
       <button
         type="button"
         aria-label="Go back"
-        onClick={() => window.history.back()}
+        onClick={() => router.back()}
         className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-white"
       >
         <ChevronLeft size={18} />
       </button>
       <h1 className="min-w-0 flex-1 text-center text-sm font-bold text-white">
-        Crypto Dashboard
+        {title}
       </h1>
-      <label className="flex items-center gap-2.5 rounded-[15px] bg-secondary px-5 py-3.5 text-sm text-secondary-foreground">
+      <form
+        role="search"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (isLive) return;
+          const value = new FormData(e.currentTarget).get("q");
+          const query = typeof value === "string" ? value.trim() : "";
+          router.push(
+            query ? `/markets?q=${encodeURIComponent(query)}` : "/markets",
+          );
+        }}
+        className="flex items-center gap-2.5 rounded-[15px] bg-secondary px-5 py-3.5 text-sm text-secondary-foreground"
+      >
         <input
           type="text"
+          name="q"
           aria-label="Search coins"
           placeholder="Search"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          {...controlledProps}
           className="w-[150px] bg-transparent outline-none placeholder:text-secondary-foreground"
         />
-        <Search size={18} />
-      </label>
+        <button type="submit" aria-label="Search" className="shrink-0">
+          <Search size={18} />
+        </button>
+      </form>
       <div id="currency">
         <CurrencySelect />
       </div>

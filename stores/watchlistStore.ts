@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 type WatchlistState = {
   ids: string[];
   toggle: (id: string) => void;
+  clear: () => void;
 };
 
 export const useWatchlistStore = create<WatchlistState>()(
@@ -15,8 +16,9 @@ export const useWatchlistStore = create<WatchlistState>()(
           ids: state.ids.includes(id)
             ? state.ids.filter((x) => x !== id)
             : [...state.ids, id],
-        }))
+        })),
+      clear: () => set({ ids: [] }),
     }),
-    { name: "watchlist"}
-  )
+    { name: "watchlist", skipHydration: true },
+  ),
 );

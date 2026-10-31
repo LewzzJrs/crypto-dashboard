@@ -1,11 +1,28 @@
-import { ChartPie, House, Settings, ShoppingBag } from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  ArrowLeftRight,
+  ChartPie,
+  House,
+  Settings,
+  ShoppingBag,
+  Star,
+} from "lucide-react";
 
 const NAV_ITEMS = [
-  { href: "#top", label: "Home", Icon: House, active: true },
-  { href: "#coins", label: "Markets", Icon: ChartPie, active: false },
-  { href: "#watchlist", label: "Watchlist", Icon: ShoppingBag, active: false },
-  { href: "#currency", label: "Settings", Icon: Settings, active: false },
+  { href: "/", label: "Home", Icon: House },
+  { href: "/markets", label: "Markets", Icon: ChartPie },
+  { href: "/watchlist", label: "Watchlist", Icon: Star },
+  { href: "/portfolio", label: "Portfolio", Icon: ShoppingBag },
+  { href: "/converter", label: "Converter", Icon: ArrowLeftRight },
+  { href: "/settings", label: "Settings", Icon: Settings },
 ];
+
+function isActive(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
 
 function LogoMark() {
   return (
@@ -27,27 +44,67 @@ function LogoMark() {
 }
 
 export function Sidebar() {
+  const pathname = usePathname();
+
   return (
-    <aside className="sticky top-0 hidden h-screen w-[100px] shrink-0 flex-col items-center pt-[30px] shadow-[inset_-1.5px_0_0_0_rgba(255,255,255,0.15)] md:flex">
-      <LogoMark />
-      <nav aria-label="Main" className="mt-[77px] flex flex-col gap-4">
-        {NAV_ITEMS.map(({ href, label, Icon, active }) => (
-          <a
-            key={label}
+    <aside className="sticky top-0 hidden h-screen w-[100px] shrink-0 flex-col items-center overflow-y-auto pt-[30px] shadow-[inset_-1.5px_0_0_0_rgba(255,255,255,0.15)] [scrollbar-width:none] md:flex">
+      <Link href="/" aria-label="Crypto Dashboard home">
+        <LogoMark />
+      </Link>
+      <nav
+        aria-label="Main"
+        className="mt-[77px] flex flex-col gap-4 pb-[30px]"
+      >
+        {NAV_ITEMS.map(({ href, label, Icon }) => {
+          const active = isActive(pathname, href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-label={label}
+              title={label}
+              aria-current={active ? "page" : undefined}
+              className={
+                active
+                  ? "flex h-[58px] w-[61px] items-center justify-center rounded-[13px] bg-accent text-white"
+                  : "flex h-[58px] w-[61px] items-center justify-center rounded-[13px] text-muted-foreground transition-colors hover:text-white"
+              }
+            >
+              <Icon size={22} />
+            </Link>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+}
+
+export function MobileNav() {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      aria-label="Main"
+      className="fixed inset-x-0 bottom-0 z-20 flex justify-around border-t border-white/10 bg-background/95 px-2 py-2 backdrop-blur md:hidden"
+    >
+      {NAV_ITEMS.map(({ href, label, Icon }) => {
+        const active = isActive(pathname, href);
+        return (
+          <Link
+            key={href}
             href={href}
             aria-label={label}
-            title={label}
             aria-current={active ? "page" : undefined}
             className={
               active
-                ? "flex h-[58px] w-[61px] items-center justify-center rounded-[13px] bg-accent text-white"
-                : "flex h-[58px] w-[61px] items-center justify-center rounded-[13px] text-muted-foreground transition-colors hover:text-white"
+                ? "flex size-11 items-center justify-center rounded-[13px] bg-accent text-white"
+                : "flex size-11 items-center justify-center rounded-[13px] text-muted-foreground"
             }
           >
             <Icon size={22} />
-          </a>
-        ))}
-      </nav>
-    </aside>
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
