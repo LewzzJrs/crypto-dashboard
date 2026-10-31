@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/app/provider";
+import { AppShell } from "@/components/AppShell";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -14,8 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Crypto Dashboard",
-  description: "Live cryptocurrency prices, charts and watchlist.",
+  title: {
+    default: "Crypto Dashboard",
+    template: "%s | Crypto Dashboard",
+  },
+  description: "Live cryptocurrency prices, charts and a watchlist.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -26,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <Providers>
-          {children}
+          <AppShell>{children}</AppShell>
         </Providers>
       </body>
     </html>
