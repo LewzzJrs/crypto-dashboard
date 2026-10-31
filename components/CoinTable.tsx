@@ -26,7 +26,9 @@ const COLUMNS = Array.from({ length: 5 }, (_, index) => index);
 export function CoinTable() {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ id: string; symbol: string } | null>(
+    null,
+  );
   const currency = useCurrencyStore((state) => state.currency);
   const watchlist = useWatchlistStore((state) => state.ids);
   const toggleWatch = useWatchlistStore((state) => state.toggle);
@@ -69,7 +71,7 @@ export function CoinTable() {
           Could not refresh data. Showing the last loaded prices.
         </p>
       )}
-      {selectedId && <PriceChart coinId={selectedId} />}
+      {selected && <PriceChart coinId={selected.id} symbol={selected.symbol} />}
       <Table>
         <TableHeader>
           <TableRow>
@@ -120,7 +122,7 @@ export function CoinTable() {
           {filteredCoins.map((coin) => (
             <TableRow
               key={coin.id}
-              onClick={() => setSelectedId(coin.id)}
+              onClick={() => setSelected({ id: coin.id, symbol: coin.symbol })}
               className="cursor-pointer"
             >
               <TableCell>
