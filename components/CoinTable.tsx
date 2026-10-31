@@ -16,12 +16,17 @@ import { Input } from "@/components/ui/input";
 import { PriceChart } from "@/components/PriceChart";
 import { CurrencySelect } from "@/components/CurrencySelect";
 import { useCurrencyStore } from "@/stores/currencyStore";
+import { useWatchlistStore } from "@/stores/watchlistStore";
+import { Star } from "lucide-react";
 
 export function CoinTable() {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const currency = useCurrencyStore((state) => state.currency);
+  const watchlist = useWatchlistStore((state) => state.ids);
+  const toggleWatch = useWatchlistStore((state) => state.toggle);
+  const [onlyWatchlist, setOnlyWatchlist] = useState(false);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Failed to load data: {error.message}</p>;
@@ -30,14 +35,18 @@ export function CoinTable() {
   const keyword = search.trim().toLowerCase();
   const filteredCoins = data.filter(
     (coin) =>
-      coin.name.toLowerCase().includes(keyword) ||
-      coin.symbol.toLowerCase().includes(keyword),
+      (coin.name.toLowerCase().includes(keyword) ||
+        coin.symbol.toLowerCase().includes(keyword)) &&
+      (!onlyWatchlist || watchlist.includes(coin.id)),
   );
 
   return (
     <div>
       <Button onClick={() => refetch()} disabled={isFetching}>
         {isFetching ? "Refreshing..." : "Refresh"}
+      </Button>
+      <Button variant="outline" onClick={() => setOnlyWatchlist((prev) => !prev)}>
+        {onlyWatchlist ? "Show all" : "Watchlist only"}
       </Button>
       <CurrencySelect />
       <Input
@@ -49,6 +58,7 @@ export function CoinTable() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead></TableHead>
             <TableHead>#</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Price</TableHead>
@@ -58,7 +68,7 @@ export function CoinTable() {
         <TableBody>
           {filteredCoins.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4}>No coins found</TableCell>
+              <TableCell colSpan={5}>No coins found</TableCell>
             </TableRow>
           )}
           {filteredCoins.map((coin) => (
@@ -67,6 +77,25 @@ export function CoinTable() {
               onClick={() => setSelectedId(coin.id)}
               className="cursor-pointer"
             >
+              <TableCell>
+                <button
+                  type="button"
+                  aria-label="Toggle watchlist"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleWatch(coin.id);
+                  }}
+                >
+                  <Star
+                    size={16}
+                    className={
+                      watchlist.includes(coin.id)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground"
+                    }
+                  />
+                </button>
+              </TableCell>
               <TableCell>{coin.market_cap_rank}</TableCell>
               <TableCell>{coin.name}</TableCell>
               <TableCell>{formatPrice(coin.current_price, currency)}</TableCell>
