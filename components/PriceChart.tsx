@@ -11,13 +11,30 @@ import {
 import { useCoinChart } from "@/hooks/useCoinChart";
 import { formatPrice } from "@/lib/format";
 import { useCurrencyStore } from "@/stores/currencyStore";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function PriceChart({ coinId }: { coinId: string }) {
-  const { data, isLoading, error } = useCoinChart(coinId);
+  const { data, isLoading, error, refetch, isFetching } = useCoinChart(coinId);
   const currency = useCurrencyStore((state) => state.currency);
 
-  if (isLoading) return <p>Loading chart...</p>;
-  if (error) return <p>Failed to load data</p>;
+  if (isLoading) return <Skeleton className="h-72 w-full" />;
+
+  if (error) {
+    return (
+      <div className="flex h-72 w-full flex-col items-center justify-center gap-3">
+        <p>Failed to load chart: {error.message}</p>
+        <Button
+          variant="outline"
+          onClick={() => refetch()}
+          disabled={isFetching}
+        >
+          {isFetching ? "Retrying..." : "Try again"}
+        </Button>
+      </div>
+    );
+  }
+
   if (!data) return null;
 
   const points = data.prices.map(([time, price]) => ({ time, price }));

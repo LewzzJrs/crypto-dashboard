@@ -13,11 +13,15 @@ import {
 import { formatPrice, formatPercent } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PriceChart } from "@/components/PriceChart";
 import { CurrencySelect } from "@/components/CurrencySelect";
 import { useCurrencyStore } from "@/stores/currencyStore";
 import { useWatchlistStore } from "@/stores/watchlistStore";
 import { Star } from "lucide-react";
+
+const SKELETON_ROWS = Array.from({ length: 8 }, (_, index) => index);
+const COLUMNS = Array.from({ length: 5 }, (_, index) => index);
 
 export function CoinTable() {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
@@ -28,24 +32,30 @@ export function CoinTable() {
   const toggleWatch = useWatchlistStore((state) => state.toggle);
   const [onlyWatchlist, setOnlyWatchlist] = useState(false);
 
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Failed to load data: {error.message}</p>;
-  if (!data) return null;
-
   const keyword = search.trim().toLowerCase();
-  const filteredCoins = data.filter(
+  const filteredCoins = (data ?? []).filter(
     (coin) =>
       (coin.name.toLowerCase().includes(keyword) ||
         coin.symbol.toLowerCase().includes(keyword)) &&
       (!onlyWatchlist || watchlist.includes(coin.id)),
   );
 
+  const showError = !!error && !data;
+  const showEmpty = !isLoading && !showError && filteredCoins.length === 0;
+  const emptyMessage =
+    onlyWatchlist && watchlist.length === 0
+      ? "Your watchlist is empty. Star a coin to add it."
+      : "No coins found";
+
   return (
     <div>
       <Button onClick={() => refetch()} disabled={isFetching}>
         {isFetching ? "Refreshing..." : "Refresh"}
       </Button>
-      <Button variant="outline" onClick={() => setOnlyWatchlist((prev) => !prev)}>
+      <Button
+        variant="outline"
+        onClick={() => setOnlyWatchlist((prev) => !prev)}
+      >
         {onlyWatchlist ? "Show all" : "Watchlist only"}
       </Button>
       <CurrencySelect />
@@ -54,6 +64,11 @@ export function CoinTable() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+      {error && data && (
+        <p className="text-sm text-destructive">
+          Could not refresh data. Showing the last loaded prices.
+        </p>
+      )}
       {selectedId && <PriceChart coinId={selectedId} />}
       <Table>
         <TableHeader>
@@ -66,9 +81,40 @@ export function CoinTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredCoins.length === 0 && (
+          {isLoading &&
+            SKELETON_ROWS.map((row) => (
+              <TableRow key={row}>
+                {COLUMNS.map((column) => (
+                  <TableCell key={column}>
+                    <Skeleton className="h-5 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          {showError && (
             <TableRow>
-              <TableCell colSpan={5}>No coins found</TableCell>
+              <TableCell colSpan={COLUMNS.length}>
+                <div className="flex flex-col items-center gap-3 py-8">
+                  <p>Failed to load data: {error?.message}</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => refetch()}
+                    disabled={isFetching}
+                  >
+                    {isFetching ? "Retrying..." : "Try again"}
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+          {showEmpty && (
+            <TableRow>
+              <TableCell
+                colSpan={COLUMNS.length}
+                className="py-8 text-center"
+              >
+                {emptyMessage}
+              </TableCell>
             </TableRow>
           )}
           {filteredCoins.map((coin) => (
