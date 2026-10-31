@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useCoins } from "@/hooks/useCoins";
 import {
   Table,
@@ -11,28 +10,31 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { formatPrice, formatPercent } from "@/lib/format";
+import type { CoinMarket } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PriceChart } from "@/components/PriceChart";
-import { CurrencySelect } from "@/components/CurrencySelect";
 import { useCurrencyStore } from "@/stores/currencyStore";
 import { useWatchlistStore } from "@/stores/watchlistStore";
-import { Star } from "lucide-react";
+import { ArrowDown, ArrowUp, Star } from "lucide-react";
 
 const SKELETON_ROWS = Array.from({ length: 8 }, (_, index) => index);
 const COLUMNS = Array.from({ length: 5 }, (_, index) => index);
 
-export function CoinTable() {
+export function CoinTable({
+  search,
+  onlyWatchlist,
+  onToggleOnlyWatchlist,
+  onSelect,
+}: {
+  search: string;
+  onlyWatchlist: boolean;
+  onToggleOnlyWatchlist: () => void;
+  onSelect: (coin: CoinMarket) => void;
+}) {
   const { data, isLoading, error, refetch, isFetching } = useCoins();
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<{ id: string; symbol: string } | null>(
-    null,
-  );
   const currency = useCurrencyStore((state) => state.currency);
   const watchlist = useWatchlistStore((state) => state.ids);
   const toggleWatch = useWatchlistStore((state) => state.toggle);
-  const [onlyWatchlist, setOnlyWatchlist] = useState(false);
 
   const keyword = search.trim().toLowerCase();
   const filteredCoins = (data ?? []).filter(
@@ -50,36 +52,29 @@ export function CoinTable() {
       : "No coins found";
 
   return (
-    <div>
-      <Button onClick={() => refetch()} disabled={isFetching}>
-        {isFetching ? "Refreshing..." : "Refresh"}
-      </Button>
-      <Button
-        variant="outline"
-        onClick={() => setOnlyWatchlist((prev) => !prev)}
-      >
-        {onlyWatchlist ? "Show all" : "Watchlist only"}
-      </Button>
-      <CurrencySelect />
-      <Input
-        placeholder="search coin..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+    <section
+      id="coins"
+      className="flex scroll-mt-5 flex-col gap-3 rounded-[20px] bg-card px-6 pb-4 pt-[17px]"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-lg font-bold text-white">All Coins</h2>
+        <Button size="lg" variant="outline" onClick={onToggleOnlyWatchlist}>
+          {onlyWatchlist ? "Show all" : "Watchlist only"}
+        </Button>
+      </div>
       {error && data && (
         <p className="text-sm text-destructive">
           Could not refresh data. Showing the last loaded prices.
         </p>
       )}
-      {selected && <PriceChart coinId={selected.id} symbol={selected.symbol} />}
       <Table>
-        <TableHeader>
+        <TableHeader className="[&_th]:text-xs [&_th]:text-[#bfb7b7]">
           <TableRow>
             <TableHead></TableHead>
             <TableHead>#</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>Price</TableHead>
-            <TableHead>24h %</TableHead>
+            <TableHead>Last Price</TableHead>
+            <TableHead>24h Change</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -119,41 +114,61 @@ export function CoinTable() {
               </TableCell>
             </TableRow>
           )}
-          {filteredCoins.map((coin) => (
-            <TableRow
-              key={coin.id}
-              onClick={() => setSelected({ id: coin.id, symbol: coin.symbol })}
-              className="cursor-pointer"
-            >
-              <TableCell>
-                <button
-                  type="button"
-                  aria-label="Toggle watchlist"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleWatch(coin.id);
-                  }}
-                >
-                  <Star
-                    size={16}
-                    className={
-                      watchlist.includes(coin.id)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-muted-foreground"
-                    }
-                  />
-                </button>
-              </TableCell>
-              <TableCell>{coin.market_cap_rank}</TableCell>
-              <TableCell>{coin.name}</TableCell>
-              <TableCell>{formatPrice(coin.current_price, currency)}</TableCell>
-              <TableCell>
-                {formatPercent(coin.price_change_percentage_24h)}
-              </TableCell>
-            </TableRow>
-          ))}
+          {filteredCoins.map((coin) => {
+            const change = coin.price_change_percentage_24h;
+            const isUp = change !== null && change >= 0;
+
+            return (
+              <TableRow
+                key={coin.id}
+                onClick={() => onSelect(coin)}
+                className="cursor-pointer"
+              >
+                <TableCell>
+                  <button
+                    type="button"
+                    aria-label="Toggle watchlist"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWatch(coin.id);
+                    }}
+                  >
+                    <Star
+                      size={16}
+                      className={
+                        watchlist.includes(coin.id)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-muted-foreground"
+                      }
+                    />
+                  </button>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {coin.market_cap_rank}
+                </TableCell>
+                <TableCell>
+                  <span className="text-white">{coin.symbol.toUpperCase()}</span>{" "}
+                  <span className="text-[#9a9a9a]">{coin.name}</span>
+                </TableCell>
+                <TableCell className="text-[#9292c1]">
+                  {formatPrice(coin.current_price, currency)}
+                </TableCell>
+                <TableCell>
+                  <span className="inline-flex items-center gap-2 text-white">
+                    {formatPercent(change)}
+                    {change !== null &&
+                      (isUp ? (
+                        <ArrowUp size={14} className="text-positive" />
+                      ) : (
+                        <ArrowDown size={14} className="text-destructive" />
+                      ))}
+                  </span>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
-    </div>
+    </section>
   );
 }

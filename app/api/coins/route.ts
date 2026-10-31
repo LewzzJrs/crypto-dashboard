@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unsupported currency" }, { status: 400 });
   }
   const currency = raw;
-  const url = `${BASE_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=250&page=1`;
+  const url = `${BASE_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=250&page=1&sparkline=true`;
 
   const res = await fetch(url, { next: { revalidate: 60} });
 

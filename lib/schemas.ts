@@ -12,6 +12,7 @@ const CoinMarketSchema = z.object({
   high_24h: z.number().nullable(),
   low_24h: z.number().nullable(),
   price_change_percentage_24h: z.number().nullable(),
+  sparkline_in_7d: z.object({ price: z.array(z.number()) }).nullish(),
 });
 
 export const CoinMarketListSchema = z.array(CoinMarketSchema);
@@ -22,3 +23,5 @@ export const CoinChartSchema = z.object({
 });
 
 export type CoinChart = z.infer<typeof CoinChartSchema>;
+
+export type CoinSelection = Pick<CoinMarket, "id" | "symbol">;

@@ -13,7 +13,7 @@ export function CurrencySelect() {
       onChange={(e) => {
         if (isCurrency(e.target.value)) setCurrency(e.target.value);
       }}
-      className="h-9 rounded-md border bg-transparent px-3 text-sm"
+      className="h-12 rounded-[15px] bg-secondary px-4 text-sm font-semibold text-secondary-foreground outline-none"
     >
       {CURRENCIES.map((c) => (
         <option key={c} value={c}>
